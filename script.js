@@ -1,14 +1,44 @@
 const knex = require('knex')({
-    client: 'mysql2',
-    connection: {
-      host: config.db.host,
-      user: config.db.user,
-      password: config.db.password,
-      database: config.db.database,
-      port: config.db.port
-    },
-  });
-  
+  client: 'mysql2',
+  connection: {
+    host: config.db.host,
+    user: config.db.user,
+    password: config.db.password,
+    database: config.db.database,
+    port: config.db.port
+  },
+});
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // Adjust according to our security needs
+
+async function hashPassword(password) {
+  return bcrypt.hash(password, saltRounds);
+}
+
+async function verifyPassword(password, hashedPassword) {
+  return bcrypt.compare(password, hashedPassword);
+}
+
+
+async function registerUser(username, password) {
+  try {
+    // Hashing the password using a secure hashing algorithm (e.g., bcrypt)
+    const hashedPassword = await hashPassword(password);
+
+    // Insert the user into the 'users'
+    const [user] = await knex('users')
+      .insert({ username, password: hashedPassword })
+      .returning('user_id');
+
+    return user;
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+}
+
+
 // Insert a new wellness entry
 async function insertWellnessEntry(user_id, date, mood, stress, sleep, motivation, hydration, soreness) {
   try {
