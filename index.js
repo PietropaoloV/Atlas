@@ -1,81 +1,92 @@
-const express = require('express');
-const app = express();
-app.use(express.json());
+const http = require('http');
+const url = require('url');
+const querystring = require('querystring');
+const { promisify } = require('util');
+const bcrypt = require('bcrypt');
+//Make sure to install the required modules using npm install bcrypt and npm install util.promisify if you haven't already.
 
-// Registration routes
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        const user = await registerUser(username, password);
-        res.json({ user_id: user });
-    } catch (error) {
-        res.status(500).json({ error: 'Registration failed' });
+const server = http.createServer((req, res) => {
+    const reqUrl = url.parse(req.url);
+    const queryParams = querystring.parse(reqUrl.query);
+    const { method, pathname } = reqUrl;
+
+    if (method === 'POST' && pathname === '/register') {
+        handleRegister(req, res);
+    } else if (method === 'POST' && pathname === '/login') {
+        handleLogin(req, res);
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
     }
 });
 
-// Login routing
-app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        const user_id = await loginUser(username, password);
-        if (user_id) {
-            res.json({ user_id });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'Login failed' });
-    }
+const PORT = 8000;
+
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
 
+// Replace these functions with your actual database operations
 async function registerUser(username, password) {
-    try {
-        // Hash the password using a secure hashing algorithm (e.g., bcrypt)
-        const hashedPassword = await hashPassword(password);
-
-        // Insert the user into the 'users' table
-        const [user] = await knex('security')
-            .insert({ username, password: hashedPassword })
-            .returning('user_id');
-
-        return user;
-    } catch (error) {
-        console.error('Error registering user:', error);
-        throw error;
-    }
+    // Simulate database insertion
+    return Promise.resolve({ user_id: 1 });
 }
-
 
 async function loginUser(username, password) {
-    try {
-        // Retrieve the user's hashed password from the database
-        const user = await knex('security').where('username', username).first();
+    // Simulate database query
+    const user = { username: 'testuser', password: '$2b$10$VPPbqWX0eC4FTC1c4Oop3OMAMcjSZhaKJ3O1jLd6AwXpAWa5DMOSW' }; // Simulated user data
 
-        if (!user) {
-            // User not found
-            return null;
-        }
+    // Verify the password using bcrypt
+    const isPasswordValid = await promisify(bcrypt.compare)(password, user.password);
 
-        // Verify the password using a secure hashing algorithm
-        const isPasswordValid = await verifyPassword(password, user.password);
-
-        if (isPasswordValid) {
-            // Password is valid, return the user_id
-            return user.user_id;
-        } else {
-            // Password is invalid
-            return null;
-        }
-    } catch (error) {
-        console.error('Error logging in user:', error);
-        throw error;
+    if (isPasswordValid) {
+        return user.user_id;
+    } else {
+        return null;
     }
 }
 
+function handleRegister(req, res) {
+    let data = '';
 
-// Start your server
-const port = 3000;
+    req.on('data', (chunk) => {
+        data += chunk;
+    });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+    req.on('end', async () => {
+        try {
+            const { username, password } = JSON.parse(data);
+            const user = await registerUser(username, password);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ user_id: user.user_id }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Registration failed' }));
+        }
+    });
+}
+
+function handleLogin(req, res) {
+    let data = '';
+
+    req.on('data', (chunk) => {
+        data += chunk;
+    });
+
+    req.on('end', async () => {
+        try {
+            const { username, password } = JSON.parse(data);
+            const user_id = await loginUser(username, password);
+            if (user_id !== null) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ user_id }));
+            } else {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid credentials' }));
+            }
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Login failed' }));
+        }
+    });
+}
