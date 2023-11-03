@@ -1,4 +1,4 @@
-const { Handler } = require("./handler");
+const { Handler } = require("./lib/main/handlers/handler");
 
 class DefaultExerciseHandler extends Handler {
     static async CreateDefaultExercise(req,res) {
