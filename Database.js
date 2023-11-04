@@ -1,0 +1,262 @@
+const mysql = require("mysql");
+const db = require("./lib/main/util/sqlconnector.js");
+const genUUID = require("./lib/main/util/util.js");
+
+const config = {
+  app: {
+    port: 8000,
+    host: 'localhost'
+  },
+  db: {
+    host: "mysql-757580f-scarletmail-41ca.a.aivencloud.com", // Replace with your remote database host
+    user: "avnadmin", // Replace with your database username
+    password: "AVNS_WoKhjweGPR4478K1pNo", // Replace with your database password
+    database: "defaultdb", // Replace with your database name
+    port: "19157" // Replace with your database port
+  }
+};
+
+(async () => {
+  console.log('Starting the async function');
+  const knex = require('knex')({
+    client: 'mysql',
+    connection: {
+      host: config.db.host,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.database,
+      port: config.db.port
+    },
+  });
+
+  // Define the table schemas
+  const tables = [
+    {
+      name: 'defaultexercise',
+      schema: (table) => {
+      table.string('exercise_id').primary();
+      table.string('user_id').notNullable();
+      table.string('name');
+      table.string('target_muscle_group');
+      table.string('forces', ['push', 'pull']);
+      table.string('rest_interval');
+      table.string('progression', ['weight', 'reps', 'time', 'distance']);
+      table.string('link');
+      }
+    },
+    {
+      name: 'security',
+      schema: (table) => {
+        table.string('username').primary();
+        table.string('user_id').notNullable();
+        table.string('password').notNullable();
+      },
+    },
+    {
+      name: 'wellness',
+      schema: (table) => {
+        table.string('wellness_id').primary();
+        table.string('user_id').notNullable();
+        table.date('date').notNullable();
+        table.enu('mood', ['worst', 'worse', 'normal', 'better', 'best']).notNullable();
+        table.enu('stress', ['extreme', 'high', 'moderate', 'mild', 'relaxed']).notNullable();
+        table.enu('sleep', ['terrible', 'poor', 'fair', 'good', 'excellent']).notNullable();
+        table.enu('motivation', ['lowest', 'lower', 'normal', 'higher', 'highest']).notNullable();
+        table.enu('hydration', ['brown', 'orange', 'yellow', 'light', 'clear']).notNullable();
+        table.enu('soreness', ['severe', 'strong', 'moderate', 'mild', 'none']).notNullable();
+      },
+    },
+    {
+      name: 'profile',
+      schema: (table) => {
+        table.string('profile_id').primary();
+        table.string('user_id').notNullable();
+        table.string('username');
+        table.timestamp('created_at');
+        table.float('height').notNullable();
+        table.float('weight').notNullable();
+        table.float('bmi').notNullable();
+        table.integer('age').notNullable();
+      },
+    },
+    {
+      name: 'workout',
+      schema: (table) => {
+        table.string('workout_id', 255).primary();
+        table.string('name', 255);
+        table.integer('user_id');
+        table.string('difficulty', 255);
+        table.string('timeStart', 255);
+        table.string('timeEnd', 255);
+        table.string('date', 255);
+        table.string('status', 255);
+      }, 
+    },
+    {
+      /*name: 'exercise',
+      schema: (table) => {
+        table.string('exercise_id').primary();
+        table.string('user_id').notNullable();
+        table.string('name');
+        table.enu('target_muscle_group', [
+          'abdominals',
+          'biceps',
+          'calves',
+          'chest',
+          'forearm',
+          'glutes',
+          'grip',
+          'hamstrings',
+          'hips',
+          'lats',
+          'lower_back',
+          'middle_back',
+          'neck',
+          'quadriceps',
+          'shoulders',
+          'triceps'
+        ]);
+        table.enu('force', ['push', 'pull']);
+        table.time('rest_interval');
+        table.enu('progression', ['weight', 'reps', 'time', 'distance']);
+        table.string('link');
+      }, */
+       name: 'exercise',
+        schema: (table) => {
+          table.string('exerciseID').primary();
+          table.string('userID').notNullable();
+          table.string('name');
+          table.string('target_muscle_group');
+          table.string('Forces');
+          table.string('rest_interval');
+          table.string('progression');
+          table.string('link');
+      },
+    },
+    {
+      /* name: 'sets',
+      schema: (table) => {
+        table.string('setID').primary();
+        table.string('exerciseID').notNullable();
+        table.string('userID').notNullable();
+        table.string('workoutID').notNullable();
+        table.date('Date').notNullable();
+        table.integer('num_of_times');
+        table.integer('weight');
+        table.enu('weight_metric', ['lbs', 'kg', 'ton', 'tonne']);
+        table.integer('distance');
+        table.enu('distance_metric', ['feet', 'yards', 'miles', 'meters', 'kilometers']);
+        table.time('rep_time');
+        table.time('rest_period');
+        table.enu('difficulty', ['easy', 'medium', 'hard', 'near_maximum', 'limit', 'failure']);
+        table.time('time_start');
+        table.time('time_end');
+      }, */
+      name: 'sets',
+      schema: (table) => {
+        table.string('setID').primary();
+        table.string('exerciseID');
+        table.string('userID');
+        table.string('workoutID');
+        table.string('Date');
+        table.string('num_of_times');
+        table.string('weight');
+        table.string('weight_metric', ['lbs', 'kg', 'ton', 'tonne']);
+        table.string('distance');
+        table.string('distance_metric', ['feet', 'yards', 'miles', 'meters', 'kilometers']);
+        table.string('rep_time');
+        table.string('rest_period');
+        table.string('difficulty', ['easy', 'medium', 'hard', 'near_maximum', 'limit', 'failure']);
+        table.string('time_start');
+        table.string('time_end');
+    }
+  }
+  ];
+
+  // Function to create tables
+  async function createTables() {
+    for (const { name, schema } of tables) {
+      // Comment out the creation code
+      try {
+      await knex.schema.createTable(name, schema);
+      } catch (error){
+        console.log(error);
+      }
+
+      // Uncomment this line to delete the table before creating it
+     //await knex.schema.dropTableIfExists(name);
+
+      console.log(`Table ${name} created.`);
+    }
+  }
+
+  // Function to delete tables (if needed)
+  async function deleteTables() {
+    for (const { name } of tables) {
+      await knex.schema.dropTableIfExists(name);
+      console.log(`Table ${name} deleted.`);
+    }
+  }
+
+  async function addDefaultExercises() {
+    try {
+      const userID = "0000000000000000000000"; // Replace with your actual userID if necessary
+  
+      // Array of default exercises to be inserted
+      const defaultExercises = [
+        { name: 'Push-up', target_muscle_group: 'chest', force: 'push', rest_interval: '1', progression: 'reps', link: 'https://www.youtube.com/watch?v=IODxDxX7oi4' },
+        { name: 'Sit-up', target_muscle_group: 'abdominals', force: 'push', rest_interval: '1', progression: 'reps', link: 'https://www.youtube.com/watch?v=1fbU_MkV7NE' },
+        { name: 'Plank', target_muscle_group: 'abdominals', force: 'push', rest_interval: '1', progression: 'reps', link: 'https://www.youtube.com/watch?v=yeKv5oX_6GY' },
+        { name: 'Squats', target_muscle_group: 'glutes', force: 'push', rest_interval: '1', progression: 'reps', link: 'https://www.youtube.com/watch?v=IB_icWRzi4E' },
+      ];
+  
+      // Insert default exercises into the database
+      for (const exercise of defaultExercises) {
+        const exerciseID = knex.raw("REPLACE(UUID(),'-','')"); // Generating UUID for each exercise
+        await knex('defaultexercise').insert({
+          exercise_id: exerciseID,
+          user_id: userID,
+          name: exercise.name,
+          target_muscle_group: exercise.target_muscle_group,
+          forces: exercise.force,
+          rest_interval: exercise.rest_interval,
+          progression: exercise.progression,
+          link: exercise.link
+        });
+      }
+  
+      console.log('Default exercises added successfully.');
+    } catch (error) {
+      console.error('Error adding default exercises:', error);
+    }
+  }
+    
+
+  // Function to generate database documentation
+  function generateDocumentation() {
+    const documentation = tables.map(({ name, schema }) => {
+      const tableSchema = knex.schema.createTable(name, schema).toString();
+      return `**Table: ${name}**\n\n${tableSchema}`;
+    }).join('\n\n');
+
+    console.log(documentation);
+  }
+
+  try {
+    // Create tables
+    await createTables();
+    await addDefaultExercises();
+    // Delete tables (if needed)
+    //await deleteTables();
+
+    // Generate database documentation
+    generateDocumentation();
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    // Close the database connection
+    knex.destroy();
+  }
+
+  console.log('Exiting the async function');
+})();
