@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jasmine",
-    "install": "npm install fast-xml-parser && npm install mysql &&  npm install uuid && short-uuid",
+    "install": "npm install fast-xml-parser && npm install mysql &&  npm install uuid && npm install short-uuid && npm install log4js",
     "install-test-suite": "npm install --save-dev jasmine"
   },
   "repository": {
@@ -24,6 +24,7 @@
   "dependencies": {
     "fast-xml-parser": "^4.3.2",
     "knex": "^3.0.1",
+    "log4js": "^6.9.1",
     "mysql": "^2.18.1",
     "short-uuid": "^4.2.2",
     "uuid": "^9.0.1"
