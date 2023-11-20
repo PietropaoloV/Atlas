@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jasmine",
-    "install": "npm install fast-xml-parser && npm install mysql &&  npm install uuid && short-uuid",
+    "install": "npm install fast-xml-parser && npm install mysql &&  npm install uuid && npm install short-uuid && npm install bcrypt && npm install crypto",
     "install-test-suite": "npm install --save-dev jasmine"
   },
   "repository": {
@@ -22,6 +22,8 @@
     "jasmine": "^5.1.0"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "crypto": "^1.0.1",
     "fast-xml-parser": "^4.3.2",
     "knex": "^3.0.1",
     "mysql": "^2.18.1",
