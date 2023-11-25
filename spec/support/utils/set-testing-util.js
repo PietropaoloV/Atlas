@@ -1,7 +1,7 @@
 const enums = require("../../../lib/main/constants/enumConstants.js");
 const { MOMENT_DATE_FORMAT } = require("../../../lib/main/constants/server-constants.js");
 const { generateShortUUID } = require("../../../lib/main/util/util.js");
-const { generateWholeRandomNumber, generateRandomEnumValue , generateRandomString} = require("./general-testing-utls.js");
+const { generateWholeRandomNumber, generateRandomEnumValue , generateRandomString} = require("./general-testing-util.js");
 const moment = require('moment');
 
 const generateRandomSet= (userId, exerciseId, setId, workoutId , date, time_start, time_end) => {

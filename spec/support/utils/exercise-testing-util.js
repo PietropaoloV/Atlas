@@ -1,6 +1,6 @@
 const enums = require("../../../lib/main/constants/enumConstants.js");
 //const { generateShortUUID } = require("../../../lib/main/util/util.js");
-const { generateRandomString, generateWholeRandomNumber, generateRandomEnumValue } = require("./general-testing-utls.js");
+const { generateRandomString, generateWholeRandomNumber, generateRandomEnumValue } = require("./general-testing-util.js");
 
 function generateRandomRestInterval() {
     return generateWholeRandomNumber(0,12) + ":" + generateWholeRandomNumber(0,59) + ":" + generateWholeRandomNumber(0,59) ;

@@ -1,11 +1,11 @@
 
-const exercise_testing_util = require("../utils/exercise-testing-utils.js");
+const exercise_testing_util = require("../utils/exercise-testing-util.js");
 const {PlotHandler, TimeSeries, Plot} = require("../../../lib/main/handlers/plot-handler.js");
-const { generateRandomSet } = require("../utils/set-testing-utils.js");
+const { generateRandomSet } = require("../utils/set-testing-util.js");
 const { generateShortUUID } = require("../../../lib/main/util/util.js");
 const jasmine = require("jasmine");
 const { momentDateFormat } = require("../../../lib/main/constants/server-constants.js");
-const { CompletedResponse } = require("../../../lib/main/util/response.js");
+const { CompletedResponse, ValidaitonError } = require("../../../lib/main/util/response.js");
 
 const ph = new PlotHandler();
 
@@ -22,7 +22,9 @@ describe("PlotHandler", () => {
                         sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/23/2023", "01:02:35", "01:03:25"));
                         sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/24/2023", "03:03:35", "03:06:24"));
                         sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/25/2023", "03:15:35", "03:17:25"));
-                        spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+
+                        let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                        spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                 
                         let actual_resp = (await ph.getExercisePlot(url)).getMessage();
                         actual_resp = JSON.parse(actual_resp);
@@ -41,7 +43,9 @@ describe("PlotHandler", () => {
                             sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/31/2023", "01:02:35", "01:03:25"));
                             sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/30/2023", "03:03:35", "03:06:24"));
                             sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/29/2023", "03:15:35", "03:17:25"));
-                            spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                            
+                            let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                            spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                     
                             let actual_resp = (await ph.getExercisePlot(url)).getMessage();
                             actual_resp = JSON.parse(actual_resp);
@@ -60,7 +64,9 @@ describe("PlotHandler", () => {
                                 sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/23/2023", "01:02:35", "01:03:25"));
                                 sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/29/2023", "03:03:35", "03:06:24"));
                                 sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/24/2023", "03:15:35", "03:17:25"));
-                                spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                                
+                                let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                                spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                         
                                 let actual_resp = (await ph.getExercisePlot(url)).getMessage();
                                 actual_resp = JSON.parse(actual_resp);
@@ -80,7 +86,8 @@ describe("PlotHandler", () => {
                                 sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/29/2023", "03:03:35", "03:06:24"));
                                 sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/24/2023", "03:15:35", "03:17:25"));
                                 
-                                spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                                let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                                spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                         
                                 let resp = await ph.getExercisePlot(url)
                                 console.log(resp);
@@ -100,7 +107,8 @@ describe("PlotHandler", () => {
                                     sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/29/2023", "03:03:35", "03:06:24"));
                                     sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/24/2023", "03:15:35", "03:17:25"));
                                     
-                                    spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                                    let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                                    spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                             
                                     let resp = await ph.getExercisePlot(url)
                                     console.log(resp);
@@ -120,7 +128,8 @@ describe("PlotHandler", () => {
                                     sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/29/2023", "03:03:35", "03:06:24"));
                                     sets.push(generateRandomSet(userId, exerciseId, otherId, otherId, "10/24/2023", "03:15:35", "03:17:25"));
                                     
-                                    spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                                    let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                                    spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                             
                                     let resp = await ph.getExercisePlot(url)
                                     console.log(resp);
@@ -136,11 +145,27 @@ describe("PlotHandler", () => {
                                         
                                         let sets = [];
                                     
-                                        spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(sets);
+                                        let set_resp =  new CompletedResponse(JSON.stringify(sets), "application/json");
+                                        spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
                                 
                                         let resp = await ph.getExercisePlot(url)
                                         console.log(resp);
                                         expect(resp.getCode()).toBe(400);         
                             });
+                            it("test empty sets ", async () => {
+                                const userId = generateShortUUID();
+                                            const exerciseId = generateShortUUID();
+                                            const otherId = generateShortUUID();
+                                            const url = `/${userId}/plot/?exerciseId=${exerciseId}&startDate=10/2asd/2023&numOfDays=-1`
+                                            
+                                            let sets = [];
+                                        
+                                            let set_resp =  new ValidaitonError("testing something going wrong");
+                                            spyOn(ph.sh, 'ListSets').withArgs(userId).and.returnValue(set_resp);
+                                    
+                                            let resp = await ph.getExercisePlot(url)
+                                            console.log(resp);
+                                            expect(resp.getCode()).toBe(400);         
+                                });
     });
 });
