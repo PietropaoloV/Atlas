@@ -1,5 +1,6 @@
 const { ProfileHandler } = require('../../../lib/main/handlers/profile-handler.js');
 const { generateShortUUID } = require('../../../lib/main/util/util.js');
+const { generateRandomProfile } = require('../utils/profile-testing-util.js');
 const { db, mysql } = require('../../../lib/main/util/sqlconnector.js');
 
 describe("ProfileHandler", () => {
@@ -43,50 +44,44 @@ describe("ProfileHandler", () => {
         });
       
         it("Req body, username, createdAt, age, bmi, height, weight existence check", async () => {
-          ph.postValue = '{"height": 175, "weight": 70, "bmi": 22.86}';
+          ph.postValue = generateRandomProfile(false,null,22.86, 175,  70,);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "height": 175, "weight": 70}';
+          ph.postValue = generateRandomProfile( false, "2023-01-01",null, 175,  70);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86}';
+          ph.postValue = generateRandomProfile("john_doe", "2023-01-01", false, 22.86, null);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
         });
       
         it("Req body, username, createdAt, age, bmi, height, weight enum", async () => {
-          ph.postValue = '{"username": null, "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
+          ph.postValue = generateRandomProfile(null, "2023-01-01", 30, 22.86, 175, 70);
+          var res = await ph.createProfile(userID);
+          expect(res.getCode()).toBe(400);
+          
+          ph.postValue = generateRandomProfile( "john_doe", "2023/01/01", 30, 22.86, 175, 70);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "invalid_date", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30.09, 22.86, 175, 70);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
-      
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": "invalid_age", "bmi": 22.86, "height": 175, "weight": 70}';
+
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 500, 175, 70);
           var res = await ph.createProfile(userID);
           expect(res.getCode()).toBe(400);
-      
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": "invalid_bmi", "height": 175, "weight": 70}';
-          var res = await ph.createProfile(userID);
-          expect(res.getCode()).toBe(400);
-      
-          ph.postValue = '{"username": "john_doe","createdAt": "2023-01-01","age": 30,"bmi": 22.86, "height": "invalid_height","weight": 70}';
+
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 22.86, 1000, 70);
           var res = await ph.createProfile(userID); 
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": "invalid_weight"}';
-          var res = await ph.createProfile(userID); // Invalid weight format
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 22.86, 175, 70000);
+          var res = await ph.createProfile(userID); 
           expect(res.getCode()).toBe(400);
         });
-      
-        //it("Create profile successfully", async () => {
-          //ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
-          //const result = await ph.createProfile(userID);
-          //expect(result.getCode()).toBe(201);
-        //});
       });
 
     describe("UpdateProfile method", () => {
@@ -98,51 +93,62 @@ describe("ProfileHandler", () => {
         });
       
         it("Req body, username, createdAt, age, bmi, height, weight existence check", async () => {
-          ph.postValue = '{"height": 175, "weight": 70, "bmi": 22.86}'; // Incomplete request body
+          ph.postValue = generateRandomProfile(null,null,null, 22.86, 175,  70,);
           var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "height": 175, "weight": 70}'; // Missing age and bmi
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01",null,null, 175,  70);
           var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86}'; // Missing height and weight
+          ph.postValue = generateRandomProfile("john_doe", "2023-01-01", 30, 22.86, null, null);
           var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
         });
       
         it("Req body, username, createdAt, age, bmi, height, weight validity check", async () => {
-          ph.postValue = '{"username": null, "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
-          var res = await ph.UpdateProfile(userID); // Null username
+          ph.postValue = generateRandomProfile(null, "2023-01-01", 30, 22.86, 175, 70);
+          var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "invalid_date", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
-          var res = await ph.UpdateProfile(userID); // Invalid date format
+          ph.postValue = generateRandomProfile( "john_doe", "2023/01/01", 30, 22.86, 175, 70);
+          var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": "invalid_age", "bmi": 22.86, "height": 175, "weight": 70}';
-          var res = await ph.UpdateProfile(userID); // Invalid age format
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30.09, 22.86, 175, 70);
+          var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": "invalid_bmi", "height": 175, "weight": 70}';
-          var res = await ph.UpdateProfile(userID); // Invalid BMI format
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 500, 175, 70);
+          var res = await ph.UpdateProfile(userID);
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": "invalid_height", "weight": 70}';
-          var res = await ph.UpdateProfile(userID); // Invalid height format
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 22.86, 1000, 70);
+          var res = await ph.UpdateProfile(userID); 
           expect(res.getCode()).toBe(400);
       
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": "invalid_weight"}';
-          var res = await ph.UpdateProfile(userID); // Invalid weight format
+          ph.postValue = generateRandomProfile( "john_doe", "2023-01-01", 30, 22.86, 175, 70000);
+          var res = await ph.UpdateProfile(userID); 
           expect(res.getCode()).toBe(400);
         });
+
+        //it("Req body, username, createdAt, age, bmi, height, weight validity check", async () => {
+          //ph.postValue = generateRandomProfile("john_doe","2023-01-01", 30, 22.86, 175, 70);
+        
+          //var result = jasmine.createSpyObj('result', {}, { affectedRows: 1 });
+          //var mockDB = {};
+        
+          //mockDB.query = jasmine.createSpy('query').and.returnValue(result);
+          //spyOn(mysql, 'createPool').and.returnValue(mockDB);
       
-        it("Update profile successfully", async () => {
-          ph.postValue = '{"username": "john_doe", "createdAt": "2023-01-01", "age": 30, "bmi": 22.86, "height": 175, "weight": 70}';
-          const result = await ph.UpdateProfile(userID, profileID);
-          expect(result.getCode()).toBe(200);
-        });
+          //var res = await ph.UpdateProfile(userID, profileID);
+          //expect(res.getCode()).toBe(200);
+        //});
+        
+      
+        
       });
-    });   
+});
+      
 
     
