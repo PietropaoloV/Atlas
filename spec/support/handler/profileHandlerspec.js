@@ -14,7 +14,7 @@ describe("ProfileHandler", () => {
             profileID = generateShortUUID();
         });
 
-        it("should return 400 if userID or workoutID is missing", async () => {
+        it("should return 400 if userID or profileID is missing", async () => {
             
             var res = await ph.GetProfile(null,profileID);
             expect(res.getCode()).toBe(400);
@@ -132,18 +132,18 @@ describe("ProfileHandler", () => {
           expect(res.getCode()).toBe(400);
         });
 
-        //it("Req body, username, createdAt, age, bmi, height, weight validity check", async () => {
-          //ph.postValue = generateRandomProfile("john_doe","2023-01-01", 30, 22.86, 175, 70);
+        it("Req body, username, createdAt, age, bmi, height, weight validity check", async () => {
+          ph.postValue = generateRandomProfile("john_doe","2023-01-01", 30, 22.86, 175, 70);
         
-          //var result = jasmine.createSpyObj('result', {}, { affectedRows: 1 });
-          //var mockDB = {};
+          var result = jasmine.createSpyObj('result', {}, { affectedRows: 1 });
+          var mockDB = {};
         
-          //mockDB.query = jasmine.createSpy('query').and.returnValue(result);
-          //spyOn(mysql, 'createPool').and.returnValue(mockDB);
+          mockDB.query = jasmine.createSpy('query').and.returnValue(result);
+          spyOn(mysql, 'createPool').and.returnValue(mockDB);
       
-          //var res = await ph.UpdateProfile(userID, profileID);
-          //expect(res.getCode()).toBe(200);
-        //});
+          var res = await ph.UpdateProfile(userID, profileID);
+          expect(res.getCode()).toBe(200);
+        });
         
       
         
