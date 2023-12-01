@@ -7,13 +7,8 @@ function generateRandomRestInterval() {
 }
 
 
-const generateRandomExercise = (userId, exerciseId) => {
-    let name = generateRandomString(6);
-    let force = generateRandomEnumValue(enums.enumList.forceEnum);
-    let muscleGroup = generateRandomEnumValue(enums.enumList.targetMuscleEnum);
-    let progression = generateRandomEnumValue(enums.enumList.progressionEnum);
+const generateRandomExercise = (userId, exerciseId, name, force, muscleGroup, progression, rest_interval, shouldParse = true) => {
     let rest_interval_metric = generateRandomEnumValue(enums.enumList.restIntervalMetricEnum);
-    let rest_interval = generateRandomRestInterval();
     let link = "http://www." + generateRandomString(6) + ".com";
 
 
@@ -28,9 +23,9 @@ const generateRandomExercise = (userId, exerciseId) => {
     + `\"rest_interval_metric\":\"${rest_interval_metric}\"}`
 
 
-    return  JSON.parse(rawExerciseString);
+    return shouldParse ? JSON.parse(rawExerciseString): rawExerciseString;
 }
-// Test File- uncomment line 34 and line 2
+// Test File- uncomment line 29 and line 2
 // console.log(generateRandomExercise(generateShortUUID(), generateShortUUID()))
 
 module.exports = {
