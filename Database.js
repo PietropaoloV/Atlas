@@ -15,7 +15,7 @@ const config = {
     database:"defaultdb"
   }
 };
-// test
+// test updated code
 (async () => {
   console.log('Starting the async function');
   const knex = require('knex')({
