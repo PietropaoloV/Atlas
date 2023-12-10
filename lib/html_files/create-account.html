@@ -98,6 +98,7 @@
             localStorage.setItem(usernameKey, username);
         }
 
+
         async function createAccount(event) {
             event.preventDefault();
             var username = document.getElementById('username').value;
@@ -117,6 +118,7 @@
         
                 if (response.ok) {
                     const data = await response.text();
+
                     setIdInCache('USER_ID_KEY', data);
                     setUsernameInCache('username', username);
                     window.location.href = 'createProfile.html?userID=' + data;
