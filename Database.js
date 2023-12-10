@@ -14,7 +14,7 @@ const config = {
     password:"AVNS_JlLpmJ4TbLc1BfkZ2io",
     port:"28768",
     database:"defaultdb"
-  }
+}
 };
 
 (async () => {
