@@ -14,6 +14,18 @@
         margin: 0;
         background-color: #f7f7f7;
     }
+    .top-right-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 8px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
     .workout-form {
         background-color: white;
@@ -76,11 +88,15 @@
     .back-btn:hover {
         background-color: #5a6268;
     }
+
 </style>
 </head>
 <body>
 
 <div class="workout-form">
+
+    <a class="top-right-button" href="ListSetUI.html">Create a Set</a>
+
     <button class="back-btn" onclick="goBack()">Back</button>
   <h2>Workout Information</h2>
   <form id="workoutForm">
@@ -128,6 +144,9 @@
 </div>
 
 <script>
+    const USER_ID_KEY = "userID";
+    const WORKOUT_ID_KEY = "workoutID";
+
     function setCurrentDateAndTime() {
         const now = new Date();
         const dateField = document.getElementById('date');
@@ -142,19 +161,27 @@
         timeEndField.value = oneHourLater.toISOString().split('T')[1].substring(0, 5);
     }
 
-    function getUserIDFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('userID');
+    function setIdInCache(idKey, number) {
+        localStorage.setItem(idKey, number);
+    }
+
+    // Function to get the number from the web cache
+    function getIdFromCache(idKey) {
+        return parseInt(localStorage.getItem(idKey)) || 0;
+    }
+
+    // Function to clear the web cache
+    function clearCache(idKey) {
+        localStorage.removeItem(idKey);
     }
 
     function goBack() {
-        const userID = getUserIDFromURL();
-        window.location.href = 'workoutViewer.html?userID=' + userID;
+        window.location.href = 'workoutViewer.html';
     }
 
     function createWorkout(event) {
         event.preventDefault();
-        const userID = getUserIDFromURL();
+        const userID = getIdFromCache(USER_ID_KEY);
 
         const workoutData = {
             name: document.getElementById('name').value,
@@ -179,8 +206,9 @@
             return response.text();
         })
         .then(data => {
+            setIdInCache(WORKOUT_ID_KEY, data);
             alert('Response from server: ' + data);
-            window.location.href = 'workoutViewer.html?userID=' + userID;
+            window.location.href = 'workoutViewer.html';
         })
         .catch(error => {
             console.error('Error saving workout:', error);
